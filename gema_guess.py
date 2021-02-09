@@ -80,7 +80,6 @@ def gema_guess(*args):
     date_result_user, date_person_user = args
     num_random, border_user = date_result_user
     name_user, password_user = date_person_user.get("name"), date_person_user.get("password")
-    print('this is dev branch')
     total = 0
     while True:
         num_user = input("Введите число: ")
