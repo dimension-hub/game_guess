@@ -3,39 +3,61 @@ from random import randrange
 
 
 def login_user():
-    validation = input(r"Если вы уже уже зарегистрированы в игре введите 'y\n':" )
-    if validation.isdigit() and validation == "y":
-        gema_guess()
-    elif validation.isdigit() and validation == "n":
-        pass
-    else:
-        pass
-
-
-def registration_user():
-    print("Ваше имя не должно содержать цифры!")
     while True:
-        name_user = input("Ваше имя: ").title()
-        if name_user.isalpha():
-            if is_valid_user(name_user):
-                print("Пароль должен быть не менее 8 символов и содержать в себе цифру, большую букву и маленькую!")
-                while True:
-                    password_user = input("Ваш пароль: ")
-                    if len(password_user) >= 8 and [i for i in password_user if i.isdigit()]:
-                        if [i for i in password_user if i.isupper()] and [i for i in password_user if i.islower()]:
-                            person = {
-                                "name":name_user,
-                                "password":password_user
-                            }
-                            return person
+        validation = input(r"Если вы уже уже зарегистрированы в игре введите 'y\n': ")
+        if validation == "y":
+            name, password = input("Ваше имя: ").title(), input("Ваш пароль: ")
+            try:
+                json.load(open("db_result_users.json"))
+            except:
+                return False
+            with open("db_result_users.json", "r") as file:
+                date_file = json.loads(file.read())
+                if [key for key in date_file if key["name"] == name] and [key for key in date_file if key["password"] == password]:
+                    for date_user in date_file:
+                        border, total = date_user.get("border"), date_user.get("total")
+                        parametr = {
+                            "name":name,
+                            "password":password,
+                            "border":border,
+                            "total":total
+                        }
+                    return parametr
+                else:
+                    print("Некорректные данные!")
+        elif validation == "n":
+            return False
+        else:
+            print("Некорректные данные!")
+
+
+def registration_user(date_person):
+    if date_person == False:
+        print("Ваше имя не должно содержать цифры!")
+        while True:
+            name_user = input("Ваше имя: ").title()
+            if name_user.isalpha():
+                if is_valid_user(name_user):
+                    print("Пароль должен быть не менее 8 символов и содержать в себе цифру, большую букву и маленькую!")
+                    while True:
+                        password_user = input("Ваш пароль: ")
+                        if len(password_user) >= 8 and [i for i in password_user if i.isdigit()]:
+                            if [i for i in password_user if i.isupper()] and [i for i in password_user if i.islower()]:
+                                person = {
+                                    "name":name_user,
+                                    "password":password_user
+                                }
+                                return person
+                            else:
+                                print("Некорректный пароль, попробуйте еще раз!")
                         else:
                             print("Некорректный пароль, попробуйте еще раз!")
-                    else:
-                        print("Некорректный пароль, попробуйте еще раз!")
+                else:
+                    print("Такое имя уже существует, придумайте новое!")
             else:
-                print("Такое имя уже существует, придумайте новое!")
-        else:
-            print("Некорректный имя, попробуйте еще раз!")
+                print("Некорректный имя, попробуйте еще раз!")
+    else:
+        return date_person
 
 
 def is_valid_user(name_user):
@@ -53,7 +75,6 @@ def is_valid_border(num):
 
 
 def gen_random(person_dict):
-    global is_valid_border
     name = person_dict.get("name")
     print(f"Добро пожаловать в числовую угадайку {name}")
     while True:
@@ -108,7 +129,8 @@ def gema_guess(*args):
 
 
 def main():
-    person = registration_user()
+    valid_person = login_user()
+    person = registration_user(valid_person)
     numbers_user = gen_random(person)
     result = gema_guess(numbers_user, person)
     result_write_json(result)
