@@ -21,8 +21,8 @@ def record_the_results(name, password, border, total):
         return print(f"Ваш результат {point} очков, продолжайте в том же духе!")
     with open("db_result_users.json", "r") as file:
         date_file = json.loads(file.read())
-    if name in [date_user.get("name") for date_user in date_file]:
-        point_max = max([date_user.get("point") for date_user in date_file if name in date_user["name"]])
+    if name in [date_user.get("name") for date_user in date_file if name == date_user.get("name")]:
+        point_max = max([date_user.get("point") for date_user in date_file if name == date_user.get("name")])
         if point > point_max:
             date.append(result_user)
             with open("db_result_users.json", "w") as file:
