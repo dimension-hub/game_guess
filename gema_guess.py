@@ -2,62 +2,45 @@ import json
 from random import randrange
 
 
-def login_user():
-    while True:
-        validation = input(r"Если вы уже уже зарегистрированы в игре введите 'y\n': ")
-        if validation == "y":
-            name, password = input("Ваше имя: ").title(), input("Ваш пароль: ")
-            try:
-                json.load(open("db_result_users.json"))
-            except:
-                return False
-            with open("db_result_users.json", "r") as file:
-                date_file = json.loads(file.read())
-                if [key for key in date_file if key["name"] == name] and [key for key in date_file if key["password"] == password]:
-                    for date_user in date_file:
-                        border, total = date_user.get("border"), date_user.get("total")
-                        parametr = {
-                            "name":name,
-                            "password":password,
-                            "border":border,
-                            "total":total
-                        }
-                    return parametr
+def record_the_results(name, password, border, total):
+    point = 0
+    for _ in range(1, int(border) + 1, 5): point += 1
+    if int(total) >= 10: point += 5
+    result_user = {
+        "name":name,
+        "password":password,
+        "point":point
+    }
+    try:
+        date = json.load(open("db_result_users.json"))
+    except:
+        date = []
+        date.append(result_user)
+        with open("db_result_users.json", "w") as file:
+            json.dump(date, file, indent=2, ensure_ascii=False)
+        return print(f"Ваш результат {point} очков, продолжайте в том же духе!")
+    with open("db_result_users.json", "r") as file:
+        date_file = json.loads(file.read())
+    if name in [date_user.get("name") for date_user in date_file]:
+        point_max = max([date_user.get("point") for date_user in date_file if name in date_user["name"]])
+        if point > point_max:
+            date.append(result_user)
+            with open("db_result_users.json", "w") as file:
+                json.dump(date, file, indent=2, ensure_ascii=False)
+                if point > max([date_user.get("point") for date_user in date_file]):
+                    return print(f"Вы показали лучший результат в игре и набрали {point} очков, поздравляем!")
                 else:
-                    print("Некорректные данные!")
-        elif validation == "n":
-            return False
+                    return print(f"Вы улучшили свой рекорд, который сейчас составляет {point} очков!")
         else:
-            print("Некорректные данные!")
-
-
-def registration_user(date_person):
-    if date_person == False:
-        print("Ваше имя не должно содержать цифры!")
-        while True:
-            name_user = input("Ваше имя: ").title()
-            if name_user.isalpha():
-                if is_valid_user(name_user):
-                    print("Пароль должен быть не менее 8 символов и содержать в себе цифру, большую букву и маленькую!")
-                    while True:
-                        password_user = input("Ваш пароль: ")
-                        if len(password_user) >= 8 and [i for i in password_user if i.isdigit()]:
-                            if [i for i in password_user if i.isupper()] and [i for i in password_user if i.islower()]:
-                                person = {
-                                    "name":name_user,
-                                    "password":password_user
-                                }
-                                return person
-                            else:
-                                print("Некорректный пароль, попробуйте еще раз!")
-                        else:
-                            print("Некорректный пароль, попробуйте еще раз!")
-                else:
-                    print("Такое имя уже существует, придумайте новое!")
-            else:
-                print("Некорректный имя, попробуйте еще раз!")
+            return print(f"Ваш лучший результат в игре{point_max}")
+    date.append(result_user)
+    with open("db_result_users.json", "w") as file:
+        json.dump(date, file, indent=2, ensure_ascii=False)
+    if point > max([date_user.get("point") for date_user in date_file]):
+        return print(f"Вы показали лучший результат в игре и набрали {point} очков, поздравляем!")
     else:
-        return date_person
+        return print(f"Ваш результат {point} очков, продолжайте в том же духе!")
+
 
 
 def is_valid_user(name_user):
@@ -67,7 +50,61 @@ def is_valid_user(name_user):
         return True
     with open("db_result_users.json", "r") as file:
         date_file = json.loads(file.read())
-        return [key for key in date_file if name_user not in key["name"]]
+    return name_user not in [date_user.get("name") for date_user in date_file]
+
+
+
+def login_user():
+    while True:
+        validation = input(r"Если вы уже уже зарегистрированы в игре введите 'y\n': ")
+        if validation == "y":
+            name, password = input("Ваше имя: ").title(), input("Ваш пароль: ")
+            try:
+                json.load(open("db_result_users.json"))
+            except:
+                print("Вы еще не прошли регистрацию!")
+                return registration_user()
+            with open("db_result_users.json") as file:
+                date_file = json.loads(file.read())
+            if [key for key in date_file if key["name"] == name] and [key for key in date_file if key["password"] == password]:
+                date_person = {
+                    "name":name,
+                    "password":password
+                }
+                return gen_random(date_person)
+            else:
+                print("Некорректные данные пользователя!")
+        elif validation == "n":
+            return registration_user()
+        else:
+            print("Некорректные данные!")
+
+
+
+def registration_user():
+    print("Ваше имя не должно содержать цифры!")
+    while True:
+        name_user = input("Ваше имя: ").title()
+        if name_user.isalpha():
+            if is_valid_user(name_user):
+                print("Пароль должен быть не менее 8 символов и содержать в себе цифру, большую букву и маленькую!")
+                password_user = input("Ваш пароль: ")
+                if len(password_user) >= 8 and [i for i in password_user if i.isdigit()]:
+                    if [i for i in password_user if i.isupper()] and [i for i in password_user if i.islower()]:
+                        paremetr = {
+                            "name": name_user,
+                            "password":password_user
+                        }
+                        return gen_random(paremetr)
+                    else:
+                        print("Некорректный пароль, попробуйте еще раз!")
+                else:
+                    print("Некорректный пароль, попробуйте еще раз!")
+            else:
+                print("Такое имя уже существует, придумайте новое!")
+        else:
+            print("Некорректне имя, попробуйте еще раз!")
+
 
 
 def is_valid_border(num):
@@ -75,53 +112,35 @@ def is_valid_border(num):
 
 
 def gen_random(person_dict):
-    name = person_dict.get("name")
+    name, password = person_dict.get("name"), person_dict.get("password")
     print(f"Добро пожаловать в числовую угадайку {name}")
     while True:
         num_border_user = input("задайте границу числа, не менее 5 и не более 100: ")
         if is_valid_border(num_border_user):
             num_border_user = int(num_border_user)
             number_random = randrange(1, num_border_user + 1)
-            return number_random, num_border_user
+            return gema_guess(name, password, number_random, num_border_user)
         else:
             print("А может быть все-таки введем целое число от 5 до 100?")
 
 
-def result_write_json(result_dict):
-    try:
-        date_result = json.load(open("db_result_users.json"))
-    except:
-        date_result = []
-    date_result.append(result_dict)
-    with open("db_result_users.json", "w") as file:
-        json.dump(date_result, file, indent=2, ensure_ascii=False)
-
-
 def gema_guess(*args):
-    date_result_user, date_person_user = args
-    num_random, border_user = date_result_user
-    name_user, password_user = date_person_user.get("name"), date_person_user.get("password")
+    name, password, num_random, num_border_user = args
     total = 0
     while True:
         num_user = input("Введите число: ")
-        if num_user.isdigit() and 1 <= int(num_user) <= border_user:
+        if num_user.isdigit() and 1 <= int(num_user) <= num_border_user:
             num_user = int(num_user)
             if num_user == num_random:
                 total += 1
-                print(f"{name_user}, хорошая игра! Ваш результат: {num_random} количество попыток № {total}")
-                result_parametr_user = {
-                    "name":name_user,
-                    "password":password_user,
-                    "border":border_user,
-                    "total":total
-                }
-                return result_parametr_user
+                print(f"{name}, хорошая игра! Ваш результат: {num_random} количество попыток № {total}")
+                return record_the_results(name, password, num_border_user, total)
             elif num_user > num_random:
                 total += 1
-                print("Ваше число больше")
+                print("Ваше число больше загаданного")
             else:
                 total += 1
-                print("Ваше число меньше")
+                print("Ваше число меньше загаданного")
         else:
             print("Введите корректное число! Не забывайте ваше число должны входить ваш диапазон.")
     
@@ -129,11 +148,8 @@ def gema_guess(*args):
 
 
 def main():
-    valid_person = login_user()
-    person = registration_user(valid_person)
-    numbers_user = gen_random(person)
-    result = gema_guess(numbers_user, person)
-    result_write_json(result)
+    login_user()
+
 
 
 
