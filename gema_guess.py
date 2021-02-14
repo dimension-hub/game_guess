@@ -32,7 +32,7 @@ def record_the_results(name, password, border, total):
                 else:
                     return print(f"Вы улучшили свой рекорд, который сейчас составляет {point} очков!")
         else:
-            return print(f"Ваш лучший результат в игре{point_max}")
+            return print(f"Вы набрали {point} а ваш лучший результат в игре{point_max}")
     date.append(result_user)
     with open("db_result_users.json", "w") as file:
         json.dump(date, file, indent=2, ensure_ascii=False)
