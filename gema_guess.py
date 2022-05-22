@@ -42,7 +42,6 @@ def record_the_results(name, password, border, total):
         return print(f"Ваш результат {point} очков, продолжайте в том же духе!")
 
 
-
 def is_valid_user(name_user):
     try:
         json.load(open("db_result_users.json"))
@@ -51,7 +50,6 @@ def is_valid_user(name_user):
     with open("db_result_users.json", "r") as file:
         date_file = json.loads(file.read())
     return name_user not in [date_user.get("name") for date_user in date_file]
-
 
 
 def login_user():
@@ -80,7 +78,6 @@ def login_user():
             print("Некорректные данные!")
 
 
-
 def registration_user():
     print("Ваше имя не должно содержать цифры!")
     while True:
@@ -104,7 +101,6 @@ def registration_user():
                 print("Такое имя уже существует, придумайте новое!")
         else:
             print("Некорректне имя, попробуйте еще раз!")
-
 
 
 def is_valid_border(num):
@@ -143,14 +139,10 @@ def gema_guess(*args):
                 print("Ваше число меньше загаданного")
         else:
             print("Введите корректное число! Не забывайте ваше число должны входить ваш диапазон.")
-    
-
-
+   
 
 def main():
     login_user()
-
-
 
 
 if __name__ == "__main__":
